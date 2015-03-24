@@ -9,13 +9,17 @@ carbon-cache. Starting this container will, by default, bind the the following
 host ports:
 
 - `8080`: the graphite web interface
-- `2003`: the carbon-cache line receiver (the standard graphite protocol)
+- `2003`: the carbon-cache UDP receiver (the standard graphite protocol)
 - `2004`: the carbon-cache pickle receiver
 - `7002`: the carbon-cache query port (used by the web interface)
 
 With this image, you can get up and running with graphite by simply running:
 
     docker build --rm -t graphite github.com/missionMeteora/collectd-graphite-docker
+
+An example of a launch string:
+
+    docker run -d --name graphite -p 8082:8080 -p 2003:2003/udp graphite
 
 You can log into the administrative interface of graphite-web (a Django
 application) with the username `admin` and password `admin`. These passwords can
