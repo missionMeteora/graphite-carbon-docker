@@ -1,7 +1,6 @@
-# DOCKER-VERSION 0.4.0
+FROM      ubuntu:14.04
+MAINTAINER Maxim Kupriianov <max@meteora.co>
 
-from	ubuntu:12.04
-run	echo 'deb http://us.archive.ubuntu.com/ubuntu/ precise universe' >> /etc/apt/sources.list
 run	apt-get -y update
 
 # Install required packages
@@ -16,7 +15,11 @@ add	./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Add graphite config
 add	./initial_data.json /var/lib/graphite/webapp/graphite/initial_data.json
-add	./local_settings.py /var/lib/graphite/webapp/graphite/local_settings.py
+
+# Local settings
+ADD	./local_settings.py /var/lib/graphite/webapp/graphite/local_settings.py
+RUN sed -i "s#^\(SECRET_KEY = \).*#\1\"`python -c 'import os; import base64; print(base64.b64encode(os.urandom(40)))'`\"#" /var/lib/graphite/webapp/graphite/local_settings.py
+
 add	./carbon.conf /var/lib/graphite/conf/carbon.conf
 add	./storage-schemas.conf /var/lib/graphite/conf/storage-schemas.conf
 run	mkdir -p /var/lib/graphite/storage/whisper
@@ -27,7 +30,7 @@ run	chmod 0664 /var/lib/graphite/storage/graphite.db
 run	cd /var/lib/graphite/webapp/graphite && python manage.py syncdb --noinput
 
 # Nginx
-expose	:80
+expose	:8080
 # Carbon line receiver port
 expose	:2003
 # Carbon pickle receiver port
@@ -36,5 +39,3 @@ expose	:2004
 expose	:7002
 
 cmd	["/usr/bin/supervisord"]
-
-# vim:ts=8:noet:
