@@ -1,10 +1,8 @@
 FROM      ubuntu:14.04
 MAINTAINER Maxim Kupriianov <max@meteora.co>
 
-run	apt-get -y update
-
 # Install required packages
-run	apt-get -y install python-ldap python-cairo python-django python-twisted python-django-tagging python-simplejson python-memcache python-pysqlite2 python-support python-pip gunicorn supervisor nginx-light
+run	apt-get -y update && apt-get -y install python-ldap python-cairo python-django python-twisted python-django-tagging python-simplejson python-memcache python-pysqlite2 python-support python-pip gunicorn supervisor nginx-light
 run	pip install whisper
 run	pip install --install-option="--prefix=/var/lib/graphite" --install-option="--install-lib=/var/lib/graphite/lib" carbon
 run	pip install --install-option="--prefix=/var/lib/graphite" --install-option="--install-lib=/var/lib/graphite/webapp" graphite-web
@@ -29,13 +27,5 @@ run	chmod 0775 /var/lib/graphite/storage /var/lib/graphite/storage/whisper
 run	chmod 0664 /var/lib/graphite/storage/graphite.db
 run	cd /var/lib/graphite/webapp/graphite && python manage.py syncdb --noinput
 
-# Nginx
-expose	:8080
-# Carbon line receiver port
-expose	:2003
-# Carbon pickle receiver port
-expose	:2004
-# Carbon cache query port
-expose	:7002
-
-cmd	["/usr/bin/supervisord"]
+EXPOSE 8080 2003/udp 2004 7002
+CMD exec supervisord -n
